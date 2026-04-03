@@ -1,0 +1,24 @@
+{
+  "name": "websticky_ver3.0",
+  "version": "1.0.0",
+  "description": "Webページに付箋を貼り付け、重要箇所へ素早く戻れるChrome拡張機能",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fumy98/webSticky_ver3.0.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fumy98/webSticky_ver3.0/issues"
+  },
+  "homepage": "https://github.com/fumy98/webSticky_ver3.0#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.1.38",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3",
+    "vite-plugin-web-extension": "^4.5.0"
+  }
+}
