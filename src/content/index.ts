@@ -1,17 +1,16 @@
 import { addSticky, removeSticky, getStickies, updateCurrentY, getCurrentY, isMaxReached } from "./stickyManager";
 import { mountFloatButton, updateFloatButtonState } from "./ui/floatButton";
-import { mountListPanel, renderPanel, togglePanel } from "./ui/listPanel";
+import { mountListPanel, renderPanel, togglePanel, hidePanel } from "./ui/listPanel";
+import { showToast } from "./ui/toast";
 
 // UIを初期化
 function init(): void {
-  // フロートボタンをマウント
   mountFloatButton(() => {
     updateCurrentY();
     renderPanel(getStickies(), getCurrentY());
     togglePanel();
   });
 
-  // リストパネルをマウント
   mountListPanel({
     onJump: (scrollY) => {
       window.scrollTo({ top: scrollY, behavior: "smooth" });
@@ -26,21 +25,22 @@ function init(): void {
     },
   });
 
-  // 初期状態を反映
   updateFloatButtonState(getStickies().length);
 }
 
-// Alt+S ショートカットで付箋を追加
+// Option+S（Mac）/ Alt+S（Win）で付箋を追加
 document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.key === "s") {
+  if (e.altKey && e.code === "KeyS") {
     if (isMaxReached()) {
-      console.info("[WebSticky] 付箋は最大5枚まで追加できます");
+      showToast("付箋は最大5枚までです");
       return;
     }
     const added = addSticky();
     if (added) {
-      updateFloatButtonState(getStickies().length);
-      console.info(`[WebSticky] 付箋を追加しました（${getStickies().length}/5）`);
+      const count = getStickies().length;
+      updateFloatButtonState(count);
+      renderPanel(getStickies(), getCurrentY());
+      showToast(`📌 付箋を追加しました（${count}/5）`);
     }
   }
 });
@@ -50,7 +50,10 @@ chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "CLEAR_STICKIES") {
     sessionStorage.removeItem(`websticky_${location.href}`);
     updateFloatButtonState(0);
+    hidePanel();
+    renderPanel([], 0);
   }
 });
 
 init();
+console.info("[WebSticky] v3.0.0 loaded");

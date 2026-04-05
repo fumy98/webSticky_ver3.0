@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSticky v3.0 — 仕様書</title>
+  <style>
+    /* ===== 全体 ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: #fafafa;
+      color: #333;
+    }
+
+    /* ===== ヘッダー ===== */
+    .page-header {
+      background: linear-gradient(135deg, #f9e4ec 0%, #fce4ec 50%, #f8bbd0 100%);
+      padding: 60px 40px;
+      text-align: center;
+      border-bottom: 2px solid #f48fb1;
+    }
+    .page-header .sakura-icon {
+      width: 72px; height: 72px;
+      margin: 0 auto 20px;
+      display: block;
+    }
+    .page-header h1 {
+      font-size: 2.4rem;
+      color: #c0527a;
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+    .page-header p {
+      font-size: 1.1rem;
+      color: #888;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .badge {
+      display: inline-block;
+      background: #f48fb1;
+      color: white;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin: 12px 4px 0;
+      font-weight: 600;
+    }
+
+    /* ===== セクション共通 ===== */
+    .section {
+      max-width: 960px;
+      margin: 60px auto;
+      padding: 0 32px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      color: #c0527a;
+      border-left: 5px solid #f48fb1;
+      padding-left: 16px;
+      margin-bottom: 32px;
+    }
+    .section-desc {
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 28px;
+      font-size: 1rem;
+    }
+
+    /* ===== 問題提起カード ===== */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .problem-card {
+      background: #fff;
+      border: 1.5px solid #eee;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .problem-card .emoji { font-size: 2rem; margin-bottom: 12px; }
+    .problem-card h3 { color: #c0527a; margin-bottom: 8px; font-size: 1rem; }
+    .problem-card p { color: #666; font-size: 0.9rem; line-height: 1.7; }
+
+    /* ===== ライブデモ ===== */
+    .demo-container {
+      background: #fff;
+      border: 2px solid #f48fb1;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(244,143,177,0.15);
+    }
+    .demo-toolbar {
+      background: #f9e4ec;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #f48fb1;
+    }
+    .demo-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .demo-dot.red { background: #ff5f57; }
+    .demo-dot.yellow { background: #febc2e; }
+    .demo-dot.green { background: #28c840; }
+    .demo-url {
+      flex: 1;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      color: #888;
+      margin-left: 8px;
+    }
+
+    /* 偽ページ */
+    .demo-page {
+      position: relative;
+      height: 480px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .fake-content {
+      padding: 32px 40px;
+    }
+    .fake-content h2 {
+      font-size: 1.3rem;
+      color: #333;
+      margin-bottom: 16px;
+    }
+    .fake-msg {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .fake-msg .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .fake-msg.user .avatar { background: #e3f2fd; }
+    .fake-msg.ai .avatar { background: #f3e5f5; }
+    .fake-msg .bubble {
+      background: #f5f5f5;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      color: #444;
+      line-height: 1.7;
+      max-width: 480px;
+    }
+    .fake-msg.ai .bubble { background: #fce4ec; }
+
+    /* sticky marker */
+    .sticky-marker {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #f48fb1, transparent);
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .sticky-marker.visible { opacity: 1; }
+    .sticky-marker .pin {
+      background: #f48fb1;
+      color: white;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    /* 拡張UI（実際の見た目） */
+    #demo-float-btn {
+      position: absolute;
+      bottom: 24px; right: 24px;
+      width: 52px; height: 52px;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.2s, transform 0.1s;
+      z-index: 10;
+    }
+    #demo-float-btn:hover {
+      box-shadow: 0 4px 16px rgba(244,143,177,0.5);
+      transform: scale(1.05);
+    }
+    #demo-float-btn.disabled { opacity: 0.4; cursor: default; }
+    #demo-float-btn svg { width: 32px; height: 32px; }
+
+    #demo-panel {
+      position: absolute;
+      bottom: 88px; right: 24px;
+      width: 260px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      z-index: 9;
+      overflow: hidden;
+      display: none;
+    }
+    #demo-panel.open { display: block; }
+    .demo-panel-header {
+      background: #f9e4ec;
+      color: #c0527a;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .demo-panel-list {
+      list-style: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .demo-panel-list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 12px;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.82rem;
+    }
+    .demo-panel-list li:last-child { border-bottom: none; }
+    .demo-item-label {
+      flex: 1;
+      color: #555;
+    }
+    .demo-item-label.current { color: #c0527a; font-weight: 600; }
+    .demo-jump-btn {
+      background: #f48fb1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .demo-jump-btn:hover { background: #c0527a; }
+    .demo-delete-btn {
+      background: #e0e0e0;
+      color: #666;
+      border: none;
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .demo-delete-btn:hover { background: #e57373; color: white; }
+
+    /* コントロール */
+    .demo-controls {
+      background: #f9e4ec;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid #f48fb1;
+      flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      background: #c0527a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .ctrl-btn:hover { background: #a3416a; }
+    .ctrl-btn.secondary {
+      background: white;
+      color: #c0527a;
+      border: 1.5px solid #f48fb1;
+    }
+    .ctrl-btn.secondary:hover { background: #f9e4ec; }
+    .ctrl-hint {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+    .demo-status {
+      font-size: 0.82rem;
+      color: #c0527a;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    /* ===== フロー図 ===== */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .flow-step {
+      text-align: center;
+      padding: 28px 16px;
+      background: white;
+      border: 1.5px solid #f0f0f0;
+      border-radius: 12px;
+      margin: 0 8px;
+      position: relative;
+    }
+    .flow-step .step-num {
+      width: 32px; height: 32px;
+      background: #f48fb1;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin: 0 auto 12px;
+    }
+    .flow-step .step-icon { font-size: 2rem; margin-bottom: 10px; }
+    .flow-step h4 { color: #c0527a; font-size: 0.9rem; margin-bottom: 8px; }
+    .flow-step p { font-size: 0.82rem; color: #777; line-height: 1.6; }
+    .flow-arrow {
+      position: absolute;
+      top: 50%; right: -20px;
+      transform: translateY(-50%);
+      color: #f48fb1;
+      font-size: 1.4rem;
+    }
+
+    /* ===== ライフサイクル表 ===== */
+    .lifecycle-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .lifecycle-table th {
+      background: #f9e4ec;
+      color: #c0527a;
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+    .lifecycle-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .lifecycle-table tr:last-child td { border-bottom: none; }
+    .tag-keep {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #388e3c;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .tag-clear {
+      display: inline-block;
+      background: #fce4ec;
+      color: #c0527a;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ===== 技術スタック ===== */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .tech-card {
+      background: white;
+      border: 1.5px solid #f0f0f0;
+      border-radius: 12px;
+      padding: 22px;
+      text-align: center;
+    }
+    .tech-card .tech-icon { font-size: 2.2rem; margin-bottom: 10px; }
+    .tech-card h4 { color: #c0527a; margin-bottom: 6px; font-size: 0.95rem; }
+    .tech-card p { font-size: 0.82rem; color: #888; line-height: 1.6; }
+
+    /* ===== インストール手順 ===== */
+    .steps-list {
+      counter-reset: step;
+      list-style: none;
+    }
+    .steps-list li {
+      counter-increment: step;
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: flex-start;
+    }
+    .steps-list li::before {
+      content: counter(step);
+      min-width: 32px; height: 32px;
+      background: #f48fb1;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .steps-list li .step-body h4 {
+      color: #333;
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+    .steps-list li .step-body p {
+      font-size: 0.87rem;
+      color: #777;
+      line-height: 1.7;
+    }
+    .steps-list code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SF Mono", monospace;
+      font-size: 0.85rem;
+      color: #c0527a;
+    }
+
+    /* ===== フッター ===== */
+    .page-footer {
+      background: #f9e4ec;
+      border-top: 2px solid #f48fb1;
+      padding: 32px;
+      text-align: center;
+      margin-top: 80px;
+    }
+    .page-footer p { color: #c0527a; font-size: 0.88rem; }
+    .page-footer .version { font-weight: 700; font-size: 1rem; }
+
+    /* ===== デモ補助 ===== */
+    .toast {
+      position: fixed;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #c0527a;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 0.88rem;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 680px) {
+      .problem-grid, .flow-grid, .tech-grid { grid-template-columns: 1fr; }
+      .flow-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== ヘッダー ===== -->
+<header class="page-header">
+  <svg class="sakura-icon" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(64,64)">
+      <ellipse cx="0" cy="-28" rx="16" ry="26" fill="#f48fb1" transform="rotate(0)"/>
+      <ellipse cx="0" cy="-28" rx="16" ry="26" fill="#f48fb1" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-28" rx="16" ry="26" fill="#f48fb1" transform="rotate(144)"/>
+      <ellipse cx="0" cy="-28" rx="16" ry="26" fill="#f48fb1" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-28" rx="16" ry="26" fill="#f48fb1" transform="rotate(288)"/>
+      <circle cx="0" cy="0" r="14" fill="#fff" stroke="#f48fb1" stroke-width="4"/>
+    </g>
+  </svg>
+  <h1>WebSticky</h1>
+  <p>Webページに付箋を貼り付けて、重要な箇所へ素早く戻れるChrome拡張機能</p>
+  <div>
+    <span class="badge">Chrome拡張</span>
+    <span class="badge">Manifest V3</span>
+    <span class="badge">TypeScript</span>
+    <span class="badge">v3.0.0</span>
+  </div>
+</header>
+
+<!-- ===== 解決する問題 ===== -->
+<section class="section">
+  <h2 class="section-title">解決する問題</h2>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="emoji">🤖</div>
+      <h3>AIチャットで回答が流れてしまう</h3>
+      <p>ChatGPT・Claude などで長い会話をしていると、さっき見た大切な回答がどこにあるかわからなくなる。</p>
+    </div>
+    <div class="problem-card">
+      <div class="emoji">📄</div>
+      <h3>長いページの「あの場所」に戻れない</h3>
+      <p>縦に長いLP・記事・ドキュメントで、後でじっくり読もうとした箇所がどこにあるか忘れてしまう。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ライブデモ ===== -->
+<section class="section">
+  <h2 class="section-title">インタラクティブデモ</h2>
+  <p class="section-desc">下のデモで実際の動作を試せます。<strong>「付箋を追加」ボタン</strong>を押して桜アイコンをクリックしてみてください。</p>
+
+  <div class="demo-container">
+    <!-- ブラウザ風ツールバー -->
+    <div class="demo-toolbar">
+      <div class="demo-dot red"></div>
+      <div class="demo-dot yellow"></div>
+      <div class="demo-dot green"></div>
+      <div class="demo-url">https://claude.ai/chat/xxxxxxxx</div>
+    </div>
+
+    <!-- 偽のWebページ -->
+    <div class="demo-page" id="demo-page">
+
+      <!-- 付箋マーカー (最大5個) -->
+      <div class="sticky-marker" id="marker-0" style="top:80px"><span class="pin">📌 付箋 1</span></div>
+      <div class="sticky-marker" id="marker-1" style="top:160px"><span class="pin">📌 付箋 2</span></div>
+      <div class="sticky-marker" id="marker-2" style="top:240px"><span class="pin">📌 付箋 3</span></div>
+      <div class="sticky-marker" id="marker-3" style="top:320px"><span class="pin">📌 付箋 4</span></div>
+      <div class="sticky-marker" id="marker-4" style="top:400px"><span class="pin">📌 付箋 5</span></div>
+
+      <!-- ページコンテンツ -->
+      <div class="fake-content">
+        <h2>💬 Claude との会話</h2>
+        <div class="fake-msg user">
+          <div class="avatar">👤</div>
+          <div class="bubble">Pythonで非同期処理をうまく使うコツを教えてください</div>
+        </div>
+        <div class="fake-msg ai">
+          <div class="avatar">🤖</div>
+          <div class="bubble">async/awaitを使う際のポイントは3つあります。①ブロッキング処理を避ける ②asyncio.gather()で並列実行 ③例外処理を忘れずに...</div>
+        </div>
+        <div class="fake-msg user">
+          <div class="avatar">👤</div>
+          <div class="bubble">gather()の使い方をもっと詳しく教えてください</div>
+        </div>
+        <div class="fake-msg ai">
+          <div class="avatar">🤖</div>
+          <div class="bubble">asyncio.gather()は複数のコルーチンを並列実行するためのAPIです。results = await asyncio.gather(task1(), task2(), task3()) のように使います...</div>
+        </div>
+      </div>
+
+      <!-- 拡張機能UI -->
+      <button id="demo-float-btn" class="disabled" title="WebSticky（付箋がないと開けません）">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(16,16)">
+            <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(0)"/>
+            <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(288)"/>
+            <circle cx="0" cy="0" r="3.5" fill="#fff" stroke="#f48fb1" stroke-width="1.2"/>
+          </g>
+        </svg>
+      </button>
+
+      <div id="demo-panel">
+        <div class="demo-panel-header">📋 付箋リスト（<span id="panel-count">0</span>/5）</div>
+        <ul class="demo-panel-list" id="panel-list"></ul>
+      </div>
+    </div>
+
+    <!-- コントロールバー -->
+    <div class="demo-controls">
+      <button class="ctrl-btn" id="btn-add">＋ 付箋を追加（Alt+S の代わり）</button>
+      <button class="ctrl-btn secondary" id="btn-reset">リセット</button>
+      <span class="ctrl-hint">桜アイコンをクリックしてリストを開く</span>
+      <span class="demo-status" id="demo-status-text">付箋: 0 / 5</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 使い方フロー ===== -->
+<section class="section">
+  <h2 class="section-title">使い方</h2>
+  <div class="flow-grid">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div class="step-icon">📍</div>
+      <h4>重要な場所で<br>Alt+S を押す</h4>
+      <p>その時点のスクロール位置が付箋として記録される（最大5個）</p>
+      <span class="flow-arrow">→</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div class="step-icon">🌸</div>
+      <h4>右下の桜アイコンを<br>クリック</h4>
+      <p>付箋リストが開く。付箋が0個のときはアイコンが薄くなり押せない</p>
+      <span class="flow-arrow">→</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div class="step-icon">📋</div>
+      <h4>リストから付箋を<br>選んで「移動」</h4>
+      <p>クリックするとその位置まで自動スクロールする</p>
+      <span class="flow-arrow">→</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div class="step-icon">🔄</div>
+      <h4>「現在地 → 戻る」で<br>元の場所に戻る</h4>
+      <p>移動前のスクロール位置を記憶しているため、いつでも元に戻れる</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ライフサイクル ===== -->
+<section class="section">
+  <h2 class="section-title">付箋のライフサイクル</h2>
+  <p class="section-desc">付箋はセッションストレージに保存されます。タブを閉じると消えますが、同じタブでのリロードは保持されます。</p>
+  <table class="lifecycle-table">
+    <thead>
+      <tr>
+        <th>操作</th>
+        <th>付箋の状態</th>
+        <th>理由</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>🔄 ページをリロード</td>
+        <td><span class="tag-keep">残る</span></td>
+        <td>sessionStorageはリロードで消えないため</td>
+      </tr>
+      <tr>
+        <td>⬅️ ブラウザの「戻る」を押す</td>
+        <td><span class="tag-clear">消える</span></td>
+        <td>バックグラウンドがナビゲーションを検知してクリア</td>
+      </tr>
+      <tr>
+        <td>🔗 別のページへ移動</td>
+        <td><span class="tag-clear">消える</span></td>
+        <td>URLが変わるためクリア（ページ固有の付箋のため）</td>
+      </tr>
+      <tr>
+        <td>❌ タブを閉じる</td>
+        <td><span class="tag-clear">消える</span></td>
+        <td>sessionStorageはタブを閉じると消えるため</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== 技術スタック ===== -->
+<section class="section">
+  <h2 class="section-title">技術スタック</h2>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-icon">🔷</div>
+      <h4>TypeScript</h4>
+      <p>Strictモード。型安全に実装。<code>any</code>型禁止。</p>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">⚡</div>
+      <h4>Vite</h4>
+      <p><code>vite-plugin-web-extension</code>でMV3対応のバンドルを生成。</p>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🗂️</div>
+      <h4>SessionStorage</h4>
+      <p>タブスコープで付箋を保存。Chrome Storage APIより軽量で即時アクセス可能。</p>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🌐</div>
+      <h4>Chrome MV3</h4>
+      <p>Manifest V3準拠。Background Service Worker + Content Script構成。</p>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🎨</div>
+      <h4>Vanilla CSS</h4>
+      <p>フレームワーク不要。z-index最大値でページ上に必ず表示。</p>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🌸</div>
+      <h4>SVGアイコン</h4>
+      <p>桜の花びら型アイコン。外部画像なし、軽量・スケーラブル。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== インストール手順 ===== -->
+<section class="section">
+  <h2 class="section-title">Chromeへの読み込み方</h2>
+  <ol class="steps-list">
+    <li>
+      <div class="step-body">
+        <h4>ビルドする</h4>
+        <p>プロジェクトのディレクトリで <code>npm run build</code> を実行。<code>dist/</code> フォルダが生成される。</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h4>Chrome の拡張機能ページを開く</h4>
+        <p>アドレスバーに <code>chrome://extensions</code> と入力してアクセス。</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h4>デベロッパーモードをONにする</h4>
+        <p>ページ右上の「デベロッパーモード」トグルをオンにする。</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h4>「パッケージ化されていない拡張機能を読み込む」をクリック</h4>
+        <p>ビルドで生成した <code>dist/</code> フォルダを選択する。</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <h4>完了！</h4>
+        <p>任意のWebページで <code>Option+S</code>（Mac）/ <code>Alt+S</code>（Windows）を押して付箋を追加してみよう。</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- ===== フッター ===== -->
+<footer class="page-footer">
+  <p class="version">🌸 WebSticky v3.0.0</p>
+  <p style="margin-top:8px">Chrome Extension · TypeScript · Manifest V3</p>
+</footer>
+
+<!-- トースト通知 -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ===== デモロジック =====
+  const stickies = [];
+  const MAX = 5;
+  const POSITIONS = [80, 160, 240, 320, 400]; // デモ用固定位置
+
+  const floatBtn = document.getElementById('demo-float-btn');
+  const panel = document.getElementById('demo-panel');
+  const panelList = document.getElementById('panel-list');
+  const panelCount = document.getElementById('panel-count');
+  const statusText = document.getElementById('demo-status-text');
+  const btnAdd = document.getElementById('btn-add');
+  const btnReset = document.getElementById('btn-reset');
+
+  let currentY = 0; // デモ用現在地
+  let panelOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function updateUI() {
+    const count = stickies.length;
+    panelCount.textContent = count;
+    statusText.textContent = `付箋: ${count} / ${MAX}`;
+
+    // ボタン状態
+    if (count === 0) {
+      floatBtn.classList.add('disabled');
+      floatBtn.title = 'WebSticky（付箋がないと開けません）';
+    } else {
+      floatBtn.classList.remove('disabled');
+      floatBtn.title = 'WebSticky — クリックしてリストを開く';
+    }
+
+    // マーカー表示
+    for (let i = 0; i < MAX; i++) {
+      const m = document.getElementById('marker-' + i);
+      if (stickies[i]) {
+        m.classList.add('visible');
+        m.querySelector('.pin').textContent = `📌 付箋 ${i + 1}`;
+      } else {
+        m.classList.remove('visible');
+      }
+    }
+
+    // パネル内容
+    renderPanel();
+  }
+
+  function renderPanel() {
+    const items = [
+      `<li>
+        <span class="demo-item-label current">📍 現在地</span>
+        <button class="demo-jump-btn" onclick="jumpToCurrent()">戻る</button>
+      </li>`,
+      ...stickies.map((s, i) => `
+        <li>
+          <span class="demo-item-label">📌 付箋 ${i + 1}（${s.y}px）</span>
+          <button class="demo-jump-btn" onclick="jumpTo(${i})">移動</button>
+          <button class="demo-delete-btn" onclick="deleteSticky(${i})">×</button>
+        </li>
+      `)
+    ].join('');
+    panelList.innerHTML = items;
+  }
+
+  function addSticky() {
+    if (stickies.length >= MAX) {
+      showToast('付箋は最大5個までです');
+      return;
+    }
+    const y = POSITIONS[stickies.length];
+    stickies.push({ y });
+    showToast(`付箋 ${stickies.length} を追加しました（${y}px）`);
+    updateUI();
+  }
+
+  function deleteSticky(idx) {
+    stickies.splice(idx, 1);
+    if (stickies.length === 0) closePanel();
+    showToast('付箋を削除しました');
+    updateUI();
+  }
+
+  function jumpTo(idx) {
+    showToast(`📌 付箋 ${idx + 1} の位置（${stickies[idx].y}px）へ移動`);
+    closePanel();
+  }
+
+  function jumpToCurrent() {
+    showToast('📍 現在地へ戻りました');
+    closePanel();
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    panelOpen = false;
+  }
+
+  // 桜ボタン
+  floatBtn.addEventListener('click', () => {
+    if (stickies.length === 0) return;
+    panelOpen = !panelOpen;
+    if (panelOpen) {
+      panel.classList.add('open');
+    } else {
+      panel.classList.remove('open');
+    }
+  });
+
+  // デモ外クリックで閉じる
+  document.addEventListener('click', (e) => {
+    if (!panelOpen) return;
+    if (!panel.contains(e.target) && e.target !== floatBtn) {
+      closePanel();
+    }
+  });
+
+  btnAdd.addEventListener('click', addSticky);
+
+  btnReset.addEventListener('click', () => {
+    stickies.length = 0;
+    closePanel();
+    showToast('リセットしました');
+    updateUI();
+  });
+
+  // 初期化
+  updateUI();
+</script>
+</body>
+</html>

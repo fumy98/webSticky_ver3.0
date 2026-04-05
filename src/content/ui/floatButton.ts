@@ -14,18 +14,18 @@ const SAKURA_SVG = `
 </svg>`;
 
 let btn: HTMLButtonElement | null = null;
-let onClickHandler: (() => void) | null = null;
 
 // ボタンをDOMに追加
 export function mountFloatButton(onClick: () => void): void {
-  onClickHandler = onClick;
-
   btn = document.createElement("button");
   btn.id = "websticky-float-btn";
   btn.innerHTML = SAKURA_SVG;
   btn.title = "WebSticky";
-  btn.addEventListener("click", onClick);
-
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (btn?.classList.contains("disabled")) return;
+    onClick();
+  });
   document.body.appendChild(btn);
 }
 

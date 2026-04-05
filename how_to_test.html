@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSticky — 動作確認手順書</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      background: #f7f7f9;
+      color: #333;
+    }
+
+    /* ヘッダー */
+    header {
+      background: linear-gradient(135deg, #1e1e2e 0%, #2d2b55 100%);
+      color: white;
+      padding: 48px 40px;
+      text-align: center;
+    }
+    header h1 { font-size: 2rem; margin-bottom: 10px; }
+    header p { color: #aaa; font-size: 1rem; }
+    .badge {
+      display: inline-block;
+      background: #f48fb1;
+      color: white;
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* 進捗バー */
+    .progress-bar-wrap {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 16px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .progress-label {
+      font-size: 0.82rem;
+      color: #888;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-track {
+      background: #eee;
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #f48fb1, #c0527a);
+      height: 100%;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    /* メイン */
+    main { max-width: 760px; margin: 48px auto; padding: 0 24px 80px; }
+
+    /* セクションタイトル */
+    .phase-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #f48fb1;
+      margin-bottom: 16px;
+      margin-top: 56px;
+    }
+    .phase-title:first-of-type { margin-top: 0; }
+
+    /* ステップカード */
+    .step-card {
+      background: white;
+      border-radius: 14px;
+      border: 2px solid #eee;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .step-card.done {
+      border-color: #a5d6a7;
+      background: #f9fff9;
+    }
+    .step-card.done .step-header { background: #e8f5e9; }
+    .step-card.done .step-num { background: #66bb6a; }
+    .step-card.done .step-title { color: #388e3c; }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      background: #fafafa;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .step-header:hover { background: #f5f5f5; }
+    .step-card.done .step-header:hover { background: #e0f2e0; }
+
+    .step-num {
+      width: 32px; height: 32px;
+      background: #f48fb1;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .step-title {
+      flex: 1;
+      font-weight: 600;
+      font-size: 0.97rem;
+      color: #333;
+    }
+    .step-check {
+      width: 24px; height: 24px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      font-size: 0.9rem;
+    }
+    .step-card.done .step-check {
+      background: #66bb6a;
+      border-color: #66bb6a;
+      color: white;
+    }
+
+    .step-body {
+      padding: 0 20px 20px 66px;
+      display: none;
+    }
+    .step-body.open { display: block; }
+
+    .step-desc {
+      color: #555;
+      font-size: 0.9rem;
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    /* 画像プレースホルダー風の操作図 */
+    .op-diagram {
+      background: #1e1e2e;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 14px 0;
+      color: #cdd6f4;
+      font-size: 0.85rem;
+      line-height: 1.9;
+    }
+    .op-diagram .path { color: #89dceb; }
+    .op-diagram .action { color: #a6e3a1; }
+    .op-diagram .note { color: #f9e2af; }
+    .op-diagram .arrow { color: #cba6f7; }
+
+    code {
+      background: #f0f0f5;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.85rem;
+      color: #c0527a;
+    }
+
+    /* チェック項目 */
+    .checklist {
+      list-style: none;
+      margin-top: 12px;
+    }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.6;
+    }
+    .checklist li .ci {
+      width: 20px; height: 20px;
+      border: 2px solid #f48fb1;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: background 0.15s;
+    }
+    .checklist li.checked .ci {
+      background: #f48fb1;
+      color: white;
+      border-color: #f48fb1;
+    }
+    .checklist li.checked span { text-decoration: line-through; color: #aaa; }
+
+    /* ヒントボックス */
+    .hint {
+      background: #fff8e1;
+      border-left: 4px solid #ffca28;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 0.86rem;
+      color: #666;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+    .hint strong { color: #f57f17; }
+
+    .warn {
+      background: #fce4ec;
+      border-left: 4px solid #f48fb1;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 0.86rem;
+      color: #666;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+
+    /* 完了バナー */
+    #complete-banner {
+      display: none;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border: 2px solid #a5d6a7;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    #complete-banner.show { display: block; }
+    #complete-banner h2 { color: #2e7d32; font-size: 1.5rem; margin-bottom: 8px; }
+    #complete-banner p { color: #555; font-size: 0.95rem; }
+
+    /* スクリーン風モック */
+    .mock-screen {
+      background: #1e1e2e;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 14px 0;
+      position: relative;
+      min-height: 120px;
+    }
+    .mock-screen .mock-bar {
+      display: flex; gap: 6px; margin-bottom: 12px;
+    }
+    .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mock-dot.r { background: #ff5f57; }
+    .mock-dot.y { background: #febc2e; }
+    .mock-dot.g { background: #28c840; }
+    .mock-url {
+      flex: 1;
+      background: #313244;
+      border-radius: 5px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      color: #888;
+      font-family: monospace;
+    }
+    .mock-content {
+      color: #cdd6f4;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      font-family: monospace;
+    }
+    .mock-sakura {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      width: 40px; height: 40px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌸 WebSticky 動作確認手順書</h1>
+  <p>Chromeに読み込んで、全機能が正しく動くことを確認する</p>
+  <span class="badge">所要時間: 約5分</span>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-label">
+    <span>進捗</span>
+    <span id="progress-text">0 / 5 ステップ完了</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<main>
+
+  <!-- Phase 1: 読み込み -->
+  <div class="phase-title">Phase 1 — Chromeに読み込む</div>
+
+  <div class="step-card" id="step-1">
+    <div class="step-header" onclick="toggleBody(1)">
+      <div class="step-num">1</div>
+      <div class="step-title">拡張機能ページを開く</div>
+      <div class="step-check" onclick="event.stopPropagation(); toggleDone(1)">✓</div>
+    </div>
+    <div class="step-body" id="body-1">
+      <p class="step-desc">Chromeのアドレスバーに以下を入力してEnterを押す。</p>
+      <div class="op-diagram">
+        <span class="arrow">①</span> Chromeのアドレスバーをクリック<br>
+        <span class="arrow">②</span> <span class="path">chrome://extensions</span> と入力<br>
+        <span class="arrow">③</span> <span class="action">Enter を押す</span>
+      </div>
+      <p class="step-desc">「Chrome に追加済みの拡張機能」一覧ページが開けばOK。</p>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-2">
+    <div class="step-header" onclick="toggleBody(2)">
+      <div class="step-num">2</div>
+      <div class="step-title">デベロッパーモードをONにする</div>
+      <div class="step-check" onclick="event.stopPropagation(); toggleDone(2)">✓</div>
+    </div>
+    <div class="step-body" id="body-2">
+      <p class="step-desc">拡張機能ページの<strong>右上</strong>に「デベロッパーモード」というトグルスイッチがある。</p>
+      <div class="op-diagram">
+        <span class="arrow">①</span> 画面右上の <span class="note">「デベロッパーモード」トグル</span> を探す<br>
+        <span class="arrow">②</span> <span class="action">クリックしてON（青色）</span> にする<br>
+        <span class="arrow">③</span> ページ上部に「パッケージ化されていない拡張機能を読み込む」ボタンが出ればOK
+      </div>
+      <div class="hint">
+        <strong>見つからない場合：</strong> ページ右上にある小さなトグルスイッチです。ONにすると左上に3つのボタンが追加されます。
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-3">
+    <div class="step-header" onclick="toggleBody(3)">
+      <div class="step-num">3</div>
+      <div class="step-title">distフォルダを読み込む</div>
+      <div class="step-check" onclick="event.stopPropagation(); toggleDone(3)">✓</div>
+    </div>
+    <div class="step-body" id="body-3">
+      <p class="step-desc">「パッケージ化されていない拡張機能を読み込む」をクリックして、ビルドされた <code>dist/</code> フォルダを選択する。</p>
+      <div class="op-diagram">
+        <span class="arrow">①</span> <span class="note">「パッケージ化されていない拡張機能を読み込む」</span> をクリック<br>
+        <span class="arrow">②</span> Finder が開くので以下のフォルダを選択：<br>
+        <span style="padding-left:20px" class="path">/Users/fumiyasakaino/workspace/webSticky_ver3.0/dist</span><br>
+        <span class="arrow">③</span> <span class="action">「開く」をクリック</span><br>
+        <span class="arrow">④</span> 一覧に「WebSticky」が追加されればOK ✅
+      </div>
+      <div class="warn">
+        <strong>エラーが出た場合：</strong> ターミナルで <code>npm run build</code> を実行してから再度お試しください。
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2: 機能確認 -->
+  <div class="phase-title">Phase 2 — 機能を確認する</div>
+
+  <div class="step-card" id="step-4">
+    <div class="step-header" onclick="toggleBody(4)">
+      <div class="step-num">4</div>
+      <div class="step-title">付箋の追加・一覧・移動・削除を確認</div>
+      <div class="step-check" onclick="event.stopPropagation(); toggleDone(4)">✓</div>
+    </div>
+    <div class="step-body" id="body-4">
+      <p class="step-desc">任意の縦長ページ（例: ChatGPTやClaudeの会話、長いWikipediaなど）を開いて動作確認する。</p>
+
+      <div class="mock-screen">
+        <div class="mock-bar">
+          <div class="mock-dot r"></div><div class="mock-dot y"></div><div class="mock-dot g"></div>
+          <div class="mock-url">https://claude.ai/chat/...</div>
+        </div>
+        <div class="mock-content">
+          ページを少しスクロールする<br>
+          ↓<br>
+          Option+S（Mac）/ Alt+S（Win）を押す<br>
+          ↓<br>
+          右下に「📌 付箋を追加しました（1/5）」が表示される<br>
+          ↓<br>
+          桜アイコンが薄色 → <span style="color:#a6e3a1">ピンク色に変わる</span>
+        </div>
+        <div class="mock-sakura">🌸</div>
+      </div>
+
+      <ul class="checklist" id="cl-4">
+        <li id="ci-4-1" onclick="toggleCheck('ci-4-1')"><div class="ci">✓</div><span>ページを開いて少しスクロールする</span></li>
+        <li id="ci-4-2" onclick="toggleCheck('ci-4-2')"><div class="ci">✓</div><span><code>Option+S</code>（Mac）または <code>Alt+S</code>（Win）を押す</span></li>
+        <li id="ci-4-3" onclick="toggleCheck('ci-4-3')"><div class="ci">✓</div><span>右下にトースト通知「📌 付箋を追加しました（1/5）」が出る</span></li>
+        <li id="ci-4-4" onclick="toggleCheck('ci-4-4')"><div class="ci">✓</div><span>桜アイコンが有効（ピンク・クリックできる状態）になる</span></li>
+        <li id="ci-4-5" onclick="toggleCheck('ci-4-5')"><div class="ci">✓</div><span>桜アイコンをクリックすると付箋リストパネルが開く</span></li>
+        <li id="ci-4-6" onclick="toggleCheck('ci-4-6')"><div class="ci">✓</div><span>リストの「移動」をクリックするとその位置へスクロールする</span></li>
+        <li id="ci-4-7" onclick="toggleCheck('ci-4-7')"><div class="ci">✓</div><span>「現在地 → 戻る」で移動前の場所に戻れる</span></li>
+        <li id="ci-4-8" onclick="toggleCheck('ci-4-8')"><div class="ci">✓</div><span>「×」ボタンで付箋を個別削除できる</span></li>
+        <li id="ci-4-9" onclick="toggleCheck('ci-4-9')"><div class="ci">✓</div><span>付箋を5枚追加すると「付箋は最大5枚までです」が出て追加できなくなる</span></li>
+        <li id="ci-4-10" onclick="toggleCheck('ci-4-10')"><div class="ci">✓</div><span>全削除後は桜アイコンが薄くなり、クリックしても反応しない</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-5">
+    <div class="step-header" onclick="toggleBody(5)">
+      <div class="step-num">5</div>
+      <div class="step-title">ライフサイクルを確認（消える・残る）</div>
+      <div class="step-check" onclick="event.stopPropagation(); toggleDone(5)">✓</div>
+    </div>
+    <div class="step-body" id="body-5">
+      <p class="step-desc">付箋が正しいタイミングで残り、消えることを確認する。</p>
+
+      <div class="op-diagram">
+        <span class="note">✅ 残るべきケース</span><br>
+        <span class="arrow">→</span> 付箋を追加した状態でページを <span class="action">リロード（Cmd+R）</span><br>
+        <span class="arrow">→</span> 桜アイコンが有効のまま・付箋リストに付箋が残っていればOK<br><br>
+        <span class="note">🗑 消えるべきケース</span><br>
+        <span class="arrow">→</span> ブラウザの <span class="action">「戻る」ボタン</span> を押す → 付箋が消える<br>
+        <span class="arrow">→</span> アドレスバーに <span class="action">別のURLを入力して遷移</span> → 付箋が消える
+      </div>
+
+      <ul class="checklist" id="cl-5">
+        <li id="ci-5-1" onclick="toggleCheck('ci-5-1')"><div class="ci">✓</div><span>リロード後も付箋が残っている</span></li>
+        <li id="ci-5-2" onclick="toggleCheck('ci-5-2')"><div class="ci">✓</div><span>ブラウザバック後は付箋が消えている（桜アイコンが薄くなる）</span></li>
+        <li id="ci-5-3" onclick="toggleCheck('ci-5-3')"><div class="ci">✓</div><span>別ページへ遷移後は付箋が消えている</span></li>
+      </ul>
+
+      <div class="hint">
+        <strong>バックのテスト方法：</strong> ページで付箋を追加 → アドレスバーに別URLを入力して遷移 → ブラウザバックで戻る → 付箋が消えていることを確認。
+      </div>
+    </div>
+  </div>
+
+  <!-- 完了バナー -->
+  <div id="complete-banner">
+    <h2>🎉 動作確認 完了！</h2>
+    <p>全ステップをクリアしました。WebSticky v3.0 は正常に動作しています。</p>
+    <p style="margin-top:12px; color:#888; font-size:0.88rem">残り: README の更新（FIXES.md の T15）</p>
+  </div>
+
+</main>
+
+<script>
+  const TOTAL = 5;
+  const done = new Set();
+
+  function toggleBody(n) {
+    const body = document.getElementById('body-' + n);
+    body.classList.toggle('open');
+  }
+
+  function toggleDone(n) {
+    const card = document.getElementById('step-' + n);
+    if (done.has(n)) {
+      done.delete(n);
+      card.classList.remove('done');
+    } else {
+      done.add(n);
+      card.classList.add('done');
+      // ボディを閉じる
+      document.getElementById('body-' + n).classList.remove('open');
+    }
+    updateProgress();
+  }
+
+  function toggleCheck(id) {
+    const li = document.getElementById(id);
+    li.classList.toggle('checked');
+  }
+
+  function updateProgress() {
+    const count = done.size;
+    const pct = (count / TOTAL) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = count + ' / ' + TOTAL + ' ステップ完了';
+
+    if (count === TOTAL) {
+      document.getElementById('complete-banner').classList.add('show');
+    } else {
+      document.getElementById('complete-banner').classList.remove('show');
+    }
+  }
+
+  // 最初のステップを開く
+  document.getElementById('body-1').classList.add('open');
+</script>
+</body>
+</html>

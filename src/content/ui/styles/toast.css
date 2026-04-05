@@ -1,0 +1,22 @@
+#websticky-toast {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  background: #c0527a;
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2147483646;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#websticky-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
