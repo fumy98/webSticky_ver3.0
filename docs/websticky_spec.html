@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebSticky v3.0 — 仕様書</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #f48fb1;
+    --pink-dark: #c0527a;
+    --pink-bg: #f9e4ec;
+    --pink-light: #fdf0f5;
+    --text: #1a1a2e;
+    --sub: #555;
+    --border: #e8e8f0;
+    --bg: #ffffff;
+    --section-bg: #f8f9fa;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #fff5f8 0%, #fce4ec 50%, #fff 100%);
+    padding: 72px 24px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--pink-dark); }
+  .hero .tagline {
+    font-size: 1.15rem;
+    color: var(--sub);
+    max-width: 520px;
+    margin: 0 auto 28px;
+  }
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: var(--pink-bg);
+    color: var(--pink-dark);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .badge.grey { background: #f0f0f5; color: #555; }
+
+  /* ── Sections ── */
+  .section { padding: 64px 24px; }
+  .section:nth-child(even) { background: var(--section-bg); }
+  .container { max-width: 860px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--pink-dark);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .section-desc { color: var(--sub); margin-bottom: 36px; }
+
+  /* ── Problem ── */
+  .problem-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .problem-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--bg);
+  }
+  .problem-card .emoji { font-size: 2rem; margin-bottom: 10px; }
+  .problem-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .problem-card p { font-size: 0.88rem; color: var(--sub); line-height: 1.5; }
+
+  /* ── Demo ── */
+  .demo-wrapper {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  }
+  .demo-toolbar {
+    background: #f0f0f5;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .demo-url {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--sub);
+    border: 1px solid var(--border);
+    margin: 0 8px;
+  }
+  .demo-body {
+    display: flex;
+    height: 420px;
+    position: relative;
+    background: #fff;
+  }
+  .demo-page {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    position: relative;
+  }
+  .demo-page-content h2 { font-size: 1.1rem; margin-bottom: 12px; color: #333; }
+  .demo-page-content p { font-size: 0.85rem; color: #666; margin-bottom: 16px; line-height: 1.6; }
+  .demo-page-content .block {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    font-size: 0.82rem;
+    color: #555;
+  }
+
+  /* 付箋マーカー */
+  .sticky-marker {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--pink);
+    opacity: 0.6;
+  }
+  .sticky-marker::before {
+    content: "📌";
+    position: absolute;
+    left: 4px;
+    top: -10px;
+    font-size: 16px;
+  }
+
+  /* フロートボタン */
+  .demo-float-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: box-shadow 0.2s, opacity 0.2s;
+  }
+  .demo-float-btn:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+  .demo-float-btn.disabled { opacity: 0.35; cursor: default; }
+
+  /* リストパネル */
+  .demo-panel {
+    position: absolute;
+    bottom: 72px;
+    right: 16px;
+    width: 220px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    z-index: 11;
+    overflow: hidden;
+    display: none;
+  }
+  .demo-panel.open { display: block; animation: pop 0.15s ease-out; }
+  @keyframes pop { from { opacity:0; transform: scale(0.92) translateY(8px); } to { opacity:1; transform: scale(1) translateY(0); } }
+  .demo-panel-header {
+    background: var(--pink-bg);
+    padding: 9px 12px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--pink-dark);
+  }
+  .demo-panel-list { max-height: 200px; overflow-y: auto; }
+  .demo-panel-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 12px;
+    gap: 6px;
+    border-bottom: 1px solid #f3f3f3;
+    font-size: 0.78rem;
+  }
+  .demo-panel-item:last-child { border-bottom: none; }
+  .demo-panel-item-label { flex: 1; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .demo-panel-item-label.cur { color: var(--pink-dark); font-weight: 700; }
+  .demo-jump-btn {
+    background: var(--pink-bg);
+    border: none;
+    border-radius: 5px;
+    padding: 2px 7px;
+    color: var(--pink-dark);
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+  .demo-jump-btn:hover { background: #f0c4d4; }
+  .demo-del-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 1px;
+  }
+  .demo-del-btn:hover { color: #e57373; }
+
+  /* トースト */
+  .demo-toast {
+    position: absolute;
+    bottom: 72px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(30,30,40,0.88);
+    color: #fff;
+    border-radius: 20px;
+    padding: 7px 18px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.2s;
+    pointer-events: none;
+    z-index: 20;
+  }
+  .demo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* コントロール */
+  .demo-controls {
+    background: #f8f9fa;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ctrl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--pink-dark);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .ctrl-btn:hover { background: #a03e63; }
+  .ctrl-btn.secondary { background: #fff; color: var(--text); border: 1.5px solid var(--border); }
+  .ctrl-btn.secondary:hover { background: #f0f0f5; }
+  .ctrl-hint { font-size: 0.78rem; color: var(--sub); margin-left: auto; }
+  .sticky-count { font-size: 0.82rem; color: var(--pink-dark); font-weight: 700; }
+
+  /* ── ライフサイクル ── */
+  .lifecycle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .lifecycle-card {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .lifecycle-card.keep { background: #e8f5e9; border: 1.5px solid #a5d6a7; }
+  .lifecycle-card.clear { background: #fce4ec; border: 1.5px solid #f48fb1; }
+  .lifecycle-card .lc-emoji { font-size: 2.2rem; margin-bottom: 10px; }
+  .lifecycle-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .lifecycle-card .lc-badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+  .keep .lc-badge { background: #c8e6c9; color: #2e7d32; }
+  .clear .lc-badge { background: #f8bbd0; color: #c0527a; }
+
+  /* ── Architecture ── */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 32px;
+  }
+  .arch-box {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 110px;
+  }
+  .arch-box .ab-icon { font-size: 1.5rem; margin-bottom: 4px; }
+  .arch-box .ab-name { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+  .arch-box .ab-sub { font-size: 0.7rem; color: var(--sub); margin-top: 2px; }
+  .arch-box.highlight { border-color: var(--pink); background: var(--pink-light); }
+  .arch-arrow {
+    font-size: 1.3rem;
+    color: #ccc;
+    padding: 0 8px;
+    user-select: none;
+  }
+  .arch-note {
+    font-size: 0.75rem;
+    color: var(--sub);
+    text-align: center;
+    flex-basis: 100%;
+    margin-top: -8px;
+    margin-bottom: 16px;
+  }
+
+  .file-tree {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 12px;
+    padding: 24px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.82rem;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .file-tree .dir { color: #89b4fa; font-weight: 600; }
+  .file-tree .file { color: #cdd6f4; }
+  .file-tree .comment { color: #6c7086; }
+  .file-tree .highlight-file { color: #f5c2e7; }
+
+  /* ── Data ── */
+  .type-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .type-card-header {
+    background: var(--pink-bg);
+    padding: 10px 16px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--pink-dark);
+  }
+  .type-table { width: 100%; border-collapse: collapse; }
+  .type-table th {
+    background: #f8f9fa;
+    padding: 8px 16px;
+    text-align: left;
+    font-size: 0.78rem;
+    color: var(--sub);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .type-table td {
+    padding: 10px 16px;
+    font-size: 0.83rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .type-table tr:last-child td { border-bottom: none; }
+  .type-table .field-name { font-family: "SF Mono","Fira Code", monospace; color: #6750a4; }
+  .type-table .field-type { font-family: "SF Mono","Fira Code", monospace; color: #0ea5e9; font-size: 0.78rem; }
+
+  /* ── Setup ── */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--pink-dark);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .step-body p { font-size: 0.88rem; color: var(--sub); margin-bottom: 8px; }
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: "SF Mono","Fira Code", monospace;
+    font-size: 0.82rem;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  .code-block .cmd { color: #89dceb; }
+  .code-block .comment { color: #6c7086; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 0.82rem;
+    color: #aaa;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-icon">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(16,16)">
+        <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(0)"/>
+        <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(72)"/>
+        <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(144)"/>
+        <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(216)"/>
+        <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(288)"/>
+        <circle cx="0" cy="0" r="3.5" fill="#fff" stroke="#f48fb1" stroke-width="1.2"/>
+      </g>
+    </svg>
+  </div>
+  <h1>Web<span>Sticky</span> <span style="font-weight:400;font-size:0.6em;color:#aaa">v3.0</span></h1>
+  <p class="tagline">Webページの好きな場所に付箋を貼り、いつでも一発でジャンプできるChrome拡張機能。</p>
+  <div class="badges">
+    <span class="badge">TypeScript</span>
+    <span class="badge">Chrome MV3</span>
+    <span class="badge">Vite</span>
+    <span class="badge grey">SessionStorage</span>
+    <span class="badge grey">外部依存ゼロ</span>
+  </div>
+</div>
+
+<!-- Problem -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">Problem</div>
+    <h2 class="section-title">こんな困りごとを解決する</h2>
+    <p class="section-desc">長いWebページを読み返すたびに、あの場所はどこだっけ——という体験をなくす。</p>
+    <div class="problem-cards">
+      <div class="problem-card">
+        <div class="emoji">💬</div>
+        <h3>AI会話が流れてしまう</h3>
+        <p>ChatGPTやClaudeで良い回答が出ても、続けてやり取りすると埋もれてしまう。</p>
+      </div>
+      <div class="problem-card">
+        <div class="emoji">📜</div>
+        <h3>縦長LPで迷子になる</h3>
+        <p>価格や特典の場所を後から確認したいのにスクロールが大変。Ctrl+Fも効かない。</p>
+      </div>
+      <div class="problem-card">
+        <div class="emoji">📖</div>
+        <h3>ドキュメントのブックマーク</h3>
+        <p>読みかけのドキュメントで「さっきここまで読んだ」という目印を残せない。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Demo -->
+<div class="section" style="background:var(--section-bg)">
+  <div class="container">
+    <div class="section-label">Interactive Demo</div>
+    <h2 class="section-title">動きをためしてみる</h2>
+    <p class="section-desc">下の「付箋を追加」ボタンで付箋が追加され、桜アイコンからリストが開きます。</p>
+
+    <div class="demo-wrapper">
+      <div class="demo-toolbar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="demo-url">https://example.com/long-article</div>
+      </div>
+      <div class="demo-body">
+        <div class="demo-page" id="demoPage">
+          <div class="demo-page-content">
+            <h2>🌟 AIとの会話ログ</h2>
+            <div class="block">Q: Reactのレンダリング最適化について教えてください</div>
+            <p>A: Reactのレンダリング最適化には主に3つのアプローチがあります。まず、React.memoを使ったコンポーネントのメモ化...</p>
+            <div class="block" id="block1">📌 付箋を貼りたい箇所1：useMemoの詳しい説明がここにあります</div>
+            <p>useMemoはコストの高い計算結果をキャッシュするためのHookです。依存配列が変わらない限り再計算されません...</p>
+            <p>次に、useCallbackを使った関数のメモ化についてです。これは子コンポーネントに渡すコールバック関数を安定させることで...</p>
+            <div class="block" id="block2">📌 付箋を貼りたい箇所2：useCallbackの使用例のコード</div>
+            <p>最後に、コード分割とReact.lazyによる遅延ローディングです。大きなコンポーネントツリーを分割することで...</p>
+            <div class="block" id="block3">📌 付箋を貼りたい箇所3：React.lazyの実装パターン</div>
+            <p>さらに詳しく見ていくと、Reactの仮想DOMの仕組みから理解することで、どこでレンダリングが発生するかを...</p>
+            <p>実際のプロジェクトでは、React DevToolsのプロファイラーを使って、どのコンポーネントが多く再レンダリングされているかを...</p>
+          </div>
+          <!-- 付箋マーカーはJSで動的追加 -->
+          <div id="stickyMarkers"></div>
+        </div>
+
+        <!-- フロートボタン -->
+        <button class="demo-float-btn disabled" id="demoFloatBtn" title="WebSticky">
+          <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+            <g transform="translate(16,16)">
+              <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(0)"/>
+              <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(144)"/>
+              <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-7" rx="4" ry="6.5" fill="#f48fb1" transform="rotate(288)"/>
+              <circle cx="0" cy="0" r="3.5" fill="#fff" stroke="#f48fb1" stroke-width="1.2"/>
+            </g>
+          </svg>
+        </button>
+
+        <!-- リストパネル -->
+        <div class="demo-panel" id="demoPanel">
+          <div class="demo-panel-header" id="demoPanelHeader">📋 付箋リスト（0/5）</div>
+          <div class="demo-panel-list" id="demoPanelList"></div>
+        </div>
+
+        <!-- トースト -->
+        <div class="demo-toast" id="demoToast"></div>
+      </div>
+
+      <!-- コントロール -->
+      <div class="demo-controls">
+        <button class="ctrl-btn" id="addStickyBtn">📌 付箋を追加 <span style="opacity:0.7;font-size:0.75em">(Alt+S)</span></button>
+        <button class="ctrl-btn secondary" id="clearStickyBtn">🗑 全消去（ページ遷移）</button>
+        <span class="sticky-count" id="stickyCountLabel">0/5枚</span>
+        <span class="ctrl-hint">桜アイコンをクリックしてリストを開く</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lifecycle -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">Lifecycle</div>
+    <h2 class="section-title">付箋の生存ルール</h2>
+    <p class="section-desc">sessionStorageを使うことで「このタブを閉じたら消える」という直感的な動作を実現。</p>
+    <div class="lifecycle-grid">
+      <div class="lifecycle-card keep">
+        <div class="lc-emoji">🔄</div>
+        <h3>リロード</h3>
+        <p style="font-size:0.85rem;color:#555;margin-top:4px">同じURLのsessionStorageが残るため付箋は保持される</p>
+        <span class="lc-badge">✅ 残る</span>
+      </div>
+      <div class="lifecycle-card clear">
+        <div class="lc-emoji">⬅️</div>
+        <h3>ブラウザバック</h3>
+        <p style="font-size:0.85rem;color:#555;margin-top:4px">backgroundがナビゲーションを検知してstorageをクリア</p>
+        <span class="lc-badge">🗑 消える</span>
+      </div>
+      <div class="lifecycle-card clear">
+        <div class="lc-emoji">🔗</div>
+        <h3>別ページへ遷移</h3>
+        <p style="font-size:0.85rem;color:#555;margin-top:4px">URL変更を検知して新URLの付箋は空の状態からスタート</p>
+        <span class="lc-badge">🗑 消える</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Architecture -->
+<div class="section" style="background:var(--section-bg)">
+  <div class="container">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">コンポーネント構成</h2>
+    <p class="section-desc">Content Script と Background Script の2層構成。外部APIなし、完全ローカル動作。</p>
+
+    <div class="arch-flow">
+      <div class="arch-box">
+        <div class="ab-icon">⌨️</div>
+        <div class="ab-name">Alt+S</div>
+        <div class="ab-sub">キーボード</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box highlight">
+        <div class="ab-icon">📝</div>
+        <div class="ab-name">index.ts</div>
+        <div class="ab-sub">Content Script</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="ab-icon">📦</div>
+        <div class="ab-name">stickyManager</div>
+        <div class="ab-sub">追加・削除・取得</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="ab-icon">💾</div>
+        <div class="ab-name">storage.ts</div>
+        <div class="ab-sub">sessionStorage</div>
+      </div>
+    </div>
+
+    <div class="arch-flow">
+      <div class="arch-box">
+        <div class="ab-icon">🖱️</div>
+        <div class="ab-name">桜アイコン</div>
+        <div class="ab-sub">クリック</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box highlight">
+        <div class="ab-icon">🌸</div>
+        <div class="ab-name">floatButton.ts</div>
+        <div class="ab-sub">UI</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box highlight">
+        <div class="ab-icon">📋</div>
+        <div class="ab-name">listPanel.ts</div>
+        <div class="ab-sub">UI</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="ab-icon">🎯</div>
+        <div class="ab-name">scrollTo()</div>
+        <div class="ab-sub">スムーズスクロール</div>
+      </div>
+    </div>
+
+    <div class="arch-flow">
+      <div class="arch-box">
+        <div class="ab-icon">🌐</div>
+        <div class="ab-name">ページ遷移</div>
+        <div class="ab-sub">webNavigation</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box highlight">
+        <div class="ab-icon">⚙️</div>
+        <div class="ab-name">background.ts</div>
+        <div class="ab-sub">Background Script</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="ab-icon">✉️</div>
+        <div class="ab-name">CLEAR_STICKIES</div>
+        <div class="ab-sub">メッセージ送信</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="ab-icon">🗑</div>
+        <div class="ab-name">storage clear</div>
+        <div class="ab-sub">付箋を全削除</div>
+      </div>
+    </div>
+
+    <div class="file-tree">
+<span class="dir">src/</span>
+├── <span class="dir">content/</span>
+│   ├── <span class="highlight-file">index.ts</span>         <span class="comment"># エントリーポイント・キーボードイベント</span>
+│   ├── <span class="highlight-file">stickyManager.ts</span> <span class="comment"># 付箋の追加・削除・取得ロジック</span>
+│   ├── <span class="highlight-file">storage.ts</span>       <span class="comment"># sessionStorage の CRUD</span>
+│   └── <span class="dir">ui/</span>
+│       ├── <span class="file">floatButton.ts</span>  <span class="comment"># 右下の桜アイコン</span>
+│       ├── <span class="file">listPanel.ts</span>    <span class="comment"># 付箋リストパネル</span>
+│       ├── <span class="file">toast.ts</span>        <span class="comment"># トースト通知</span>
+│       └── <span class="dir">styles/</span>          <span class="comment"># 各CSS</span>
+├── <span class="dir">background/</span>
+│   └── <span class="highlight-file">index.ts</span>         <span class="comment"># ナビゲーション検知・付箋クリア</span>
+└── <span class="file">types.ts</span>             <span class="comment"># Sticky / StickyStore 型定義</span>
+    </div>
+  </div>
+</div>
+
+<!-- Data -->
+<div class="section">
+  <div class="container">
+    <div class="section-label">Data Structure</div>
+    <h2 class="section-title">型定義</h2>
+    <p class="section-desc">sessionStorageに保存されるデータ構造。キーは <code style="background:#f0f0f5;padding:2px 6px;border-radius:4px;font-size:0.85em">websticky_{url}</code>。</p>
+
+    <div class="type-card">
+      <div class="type-card-header">type Sticky</div>
+      <table class="type-table">
+        <thead><tr><th>フィールド</th><th>型</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="field-name">id</td><td class="field-type">string</td><td>crypto.randomUUID() で生成するユニークID</td></tr>
+          <tr><td class="field-name">scrollY</td><td class="field-type">number</td><td>付箋を貼ったときの window.scrollY（px）</td></tr>
+          <tr><td class="field-name">createdAt</td><td class="field-type">number</td><td>作成時刻のUNIXタイムスタンプ（ms）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="type-card">
+      <div class="type-card-header">type StickyStore</div>
+      <table class="type-table">
+        <thead><tr><th>フィールド</th><th>型</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="field-name">url</td><td class="field-type">string</td><td>対象ページのURL（キーと同一）</td></tr>
+          <tr><td class="field-name">stickies</td><td class="field-type">Sticky[]</td><td>付箋の配列（最大5件）</td></tr>
+          <tr><td class="field-name">currentY</td><td class="field-type">number</td><td>リストパネルを開いたときの現在地（px）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Setup -->
+<div class="section" style="background:var(--section-bg)">
+  <div class="container">
+    <div class="section-label">Setup</div>
+    <h2 class="section-title">インストール手順</h2>
+    <p class="section-desc">Chromeにローカルインストールするだけ。ストア公開は不要。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>依存パッケージをインストール</h3>
+          <div class="code-block">
+<span class="cmd">cd</span> webSticky_ver3.0
+<span class="cmd">npm</span> install
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>ビルド</h3>
+          <div class="code-block">
+<span class="cmd">npm</span> run build
+<span class="comment"># → dist/ フォルダが生成される</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Chromeに読み込む</h3>
+          <p><code style="background:#f0f0f5;padding:2px 6px;border-radius:4px">chrome://extensions/</code> を開き、デベロッパーモードをONにして「パッケージ化されていない拡張機能を読み込む」から <strong>dist/</strong> を選択。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>使ってみる</h3>
+          <p>任意のページで <strong>Option+S（Mac）/ Alt+S（Win）</strong> を押すと付箋が追加されます。右下の桜アイコンをクリックしてリストを開いてください。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>WebSticky v3.0 — Chrome Extension Spec &nbsp;|&nbsp; Built with TypeScript + Vite</footer>
+
+<script>
+// ── Demo Logic ──────────────────────────────────────────────────────────
+const MAX = 5;
+let stickies = [];
+let panelOpen = false;
+
+const floatBtn = document.getElementById('demoFloatBtn');
+const panel = document.getElementById('demoPanel');
+const panelHeader = document.getElementById('demoPanelHeader');
+const panelList = document.getElementById('demoPanelList');
+const addBtn = document.getElementById('addStickyBtn');
+const clearBtn = document.getElementById('clearStickyBtn');
+const countLabel = document.getElementById('stickyCountLabel');
+const toastEl = document.getElementById('demoToast');
+const markersEl = document.getElementById('stickyMarkers');
+
+const SCROLL_POSITIONS = [80, 200, 340, 480, 580];
+let nextPos = 0;
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 2000);
+}
+
+function renderPanel() {
+  panelHeader.textContent = `📋 付箋リスト（${stickies.length}/5）`;
+  const currentY = 120; // mock
+  const items = [
+    `<div class="demo-panel-item">
+      <span class="demo-panel-item-label cur">📍 現在地</span>
+      <button class="demo-jump-btn" onclick="showToast('現在地へ戻ります')">戻る</button>
+    </div>`,
+    ...stickies.map((s, i) => `
+      <div class="demo-panel-item">
+        <span class="demo-panel-item-label">📌 付箋${i+1}（${s.scrollY}px）</span>
+        <button class="demo-jump-btn" onclick="jumpTo(${s.scrollY})">移動</button>
+        <button class="demo-del-btn" onclick="deleteSticky('${s.id}')">×</button>
+      </div>
+    `)
+  ].join('');
+  panelList.innerHTML = items;
+}
+
+function jumpTo(scrollY) {
+  const page = document.getElementById('demoPage');
+  page.scrollTo({ top: scrollY, behavior: 'smooth' });
+  showToast(`${scrollY}px へジャンプ`);
+}
+
+function addSticky() {
+  if (stickies.length >= MAX) {
+    showToast('付箋は最大5枚までです');
+    return;
+  }
+  const scrollY = SCROLL_POSITIONS[nextPos % SCROLL_POSITIONS.length];
+  nextPos++;
+  stickies.push({ id: Date.now().toString(), scrollY });
+  updateUI();
+  renderPanel();
+  showToast(`📌 付箋を追加しました（${stickies.length}/5）`);
+}
+
+function deleteSticky(id) {
+  stickies = stickies.filter(s => s.id !== id);
+  updateUI();
+  renderPanel();
+  if (stickies.length === 0) {
+    panelOpen = false;
+    panel.classList.remove('open');
+  }
+}
+
+function updateUI() {
+  countLabel.textContent = `${stickies.length}/5枚`;
+
+  // フロートボタン
+  if (stickies.length === 0) {
+    floatBtn.classList.add('disabled');
+  } else {
+    floatBtn.classList.remove('disabled');
+  }
+
+  // マーカー描画
+  markersEl.innerHTML = stickies.map(s => `
+    <div class="sticky-marker" style="top:${s.scrollY}px;"></div>
+  `).join('');
+}
+
+function togglePanel() {
+  if (stickies.length === 0) return;
+  panelOpen = !panelOpen;
+  panel.classList.toggle('open', panelOpen);
+}
+
+floatBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  togglePanel();
+});
+addBtn.addEventListener('click', addSticky);
+clearBtn.addEventListener('click', () => {
+  stickies = [];
+  panelOpen = false;
+  panel.classList.remove('open');
+  nextPos = 0;
+  updateUI();
+  showToast('🗑 付箋を全消去しました（ページ遷移を模擬）');
+});
+document.addEventListener('click', (e) => {
+  if (!panel.contains(e.target) && e.target !== floatBtn) {
+    panelOpen = false;
+    panel.classList.remove('open');
+  }
+});
+// キーボードショートカット（デモ内のみ）
+document.addEventListener('keydown', (e) => {
+  if (e.altKey && e.code === 'KeyS') {
+    e.preventDefault();
+    addSticky();
+  }
+});
+</script>
+</body>
+</html>
