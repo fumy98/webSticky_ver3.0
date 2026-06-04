@@ -1,31 +1,30 @@
 import { addSticky, removeSticky, getStickies, updateCurrentY, getCurrentY, isMaxReached } from "./stickyManager";
-import { mountFloatButton, updateFloatButtonState } from "./ui/floatButton";
-import { mountListPanel, renderPanel, togglePanel, hidePanel } from "./ui/listPanel";
+import { mountSakuraButton, updateSakuraPetals } from "./ui/floatButton";
 import { showToast } from "./ui/toast";
 
-// UIを初期化
+function refresh(): void {
+  updateSakuraPetals(getStickies());
+}
+
 function init(): void {
-  mountFloatButton(() => {
-    updateCurrentY();
-    renderPanel(getStickies(), getCurrentY());
-    togglePanel();
-  });
-
-  mountListPanel({
-    onJump: (scrollY) => {
+  mountSakuraButton({
+    // 中央（黄色い種）: 保存した現在地へ戻る
+    onCenterClick: () => {
+      window.scrollTo({ top: getCurrentY(), behavior: "smooth" });
+    },
+    // 花びら: 対応する付箋位置へジャンプ
+    onPetalClick: (scrollY) => {
+      updateCurrentY();
       window.scrollTo({ top: scrollY, behavior: "smooth" });
     },
-    onDelete: (id) => {
+    // 花びら右クリック: 付箋を削除
+    onPetalDelete: (id) => {
       removeSticky(id);
-      renderPanel(getStickies(), getCurrentY());
-      updateFloatButtonState(getStickies().length);
-    },
-    onCurrentJump: (scrollY) => {
-      window.scrollTo({ top: scrollY, behavior: "smooth" });
+      refresh();
+      showToast("付箋を削除しました");
     },
   });
-
-  updateFloatButtonState(getStickies().length);
+  refresh();
 }
 
 // Option+S（Mac）/ Alt+S（Win）で付箋を追加
@@ -35,12 +34,11 @@ document.addEventListener("keydown", (e) => {
       showToast("付箋は最大5枚までです");
       return;
     }
+    updateCurrentY();
     const added = addSticky();
     if (added) {
-      const count = getStickies().length;
-      updateFloatButtonState(count);
-      renderPanel(getStickies(), getCurrentY());
-      showToast(`📌 付箋を追加しました（${count}/5）`);
+      refresh();
+      showToast(`📌 付箋を追加しました（${getStickies().length}/5）`);
     }
   }
 });
@@ -49,9 +47,7 @@ document.addEventListener("keydown", (e) => {
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "CLEAR_STICKIES") {
     sessionStorage.removeItem(`websticky_${location.href}`);
-    updateFloatButtonState(0);
-    hidePanel();
-    renderPanel([], 0);
+    refresh();
   }
 });
 

@@ -1,32 +1,46 @@
-#websticky-float-btn {
+#websticky-sakura {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  bottom: 20px;
+  right: 20px;
   z-index: 2147483647;
-  transition: box-shadow 0.2s, opacity 0.2s;
-  padding: 0;
+  user-select: none;
 }
 
-#websticky-float-btn:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+#websticky-sakura-svg {
+  width: 90px;
+  height: 90px;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.18));
+  transition: filter 0.2s;
 }
 
-#websticky-float-btn.disabled {
-  opacity: 0.4;
-  cursor: default;
+#websticky-sakura-svg:hover {
+  filter: drop-shadow(0 4px 16px rgba(244, 143, 177, 0.5));
 }
 
-#websticky-float-btn svg {
-  width: 32px;
-  height: 32px;
+.ws-petal {
+  cursor: pointer;
+}
+
+.ws-petal-path {
+  fill: #f9b8d0;
+  transition: fill 0.15s;
+}
+
+.ws-petal:hover .ws-petal-path {
+  fill: #f48fb1;
+}
+
+.ws-center {
+  cursor: pointer;
+}
+
+.ws-center-circle {
+  fill: #fdf0a0;
+  stroke: #e8c840;
+  stroke-width: 1.5;
+  transition: fill 0.15s;
+}
+
+.ws-center:hover .ws-center-circle {
+  fill: #fce050;
 }
