@@ -56,6 +56,10 @@
   - `chrome.webNavigation.onCommitted` でナビゲーション検知
   - リロード以外で sessionStorage をクリア
 
+## Phase 8: デザイン改善
+
+- [x] **T16** — 花びらの形をシャープに調整（現状が丸すぎてハート型に見える）
+
 ## Phase 7: 統合・動作確認
 
 - [ ] **T14** — Chrome に拡張機能を読み込んで動作確認
