@@ -6,13 +6,14 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // キーボードショートカット（ブラウザレベルで処理するのでSPAでも動く）
-// コールバック第2引数のtabが操作時にフォーカスされていたタブ
-chrome.commands.onCommand.addListener((command, tab) => {
-  if (!tab?.id) return;
+// tabはページにフォーカスがない場合undefinedになるためfallback付き
+chrome.commands.onCommand.addListener(async (command, tab) => {
+  const targetId = tab?.id ?? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]?.id;
+  if (!targetId) return;
   if (command === "add-sticky") {
-    chrome.tabs.sendMessage(tab.id, { type: "ADD_STICKY" }).catch(() => {});
+    chrome.tabs.sendMessage(targetId, { type: "ADD_STICKY" }).catch(() => {});
   } else if (command === "clear-stickies") {
-    chrome.tabs.sendMessage(tab.id, { type: "CLEAR_ALL_STICKIES" }).catch(() => {});
+    chrome.tabs.sendMessage(targetId, { type: "CLEAR_ALL_STICKIES" }).catch(() => {});
   }
 });
 
