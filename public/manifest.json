@@ -28,6 +28,13 @@
         "mac": "Alt+S"
       },
       "description": "付箋を追加"
+    },
+    "clear-stickies": {
+      "suggested_key": {
+        "default": "Alt+D",
+        "mac": "Alt+D"
+      },
+      "description": "付箋を全て削除"
     }
   },
   "action": {

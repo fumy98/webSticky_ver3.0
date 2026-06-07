@@ -5,6 +5,17 @@ chrome.action.onClicked.addListener((tab) => {
   }
 });
 
+// キーボードショートカット（ブラウザレベルで処理するのでSPAでも動く）
+chrome.commands.onCommand.addListener(async (command) => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) return;
+  if (command === "add-sticky") {
+    chrome.tabs.sendMessage(tab.id, { type: "ADD_STICKY" }).catch(() => {});
+  } else if (command === "clear-stickies") {
+    chrome.tabs.sendMessage(tab.id, { type: "CLEAR_ALL_STICKIES" }).catch(() => {});
+  }
+});
+
 // ナビゲーション検知：リロード以外で付箋をクリア
 chrome.webNavigation.onCommitted.addListener((details) => {
   // メインフレームのみ対象

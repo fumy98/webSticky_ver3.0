@@ -37,34 +37,6 @@ function init(): void {
   refresh();
 }
 
-// キーボードショートカット（capture: true でページの横取りより優先）
-window.addEventListener("keydown", (e) => {
-  if (!e.altKey) return;
-
-  // Option+S（Mac）/ Alt+S（Win）: 付箋を追加
-  if (e.code === "KeyS") {
-    e.preventDefault();
-    if (isMaxReached()) {
-      showToast("付箋は最大5枚までです");
-      return;
-    }
-    const added = addSticky();
-    if (added) {
-      refresh();
-      showToast(`📌 付箋を追加しました（${getStickies().length}/5）`);
-    }
-  }
-
-  // Option+D（Mac）/ Alt+D（Win）: 全付箋を削除
-  if (e.code === "KeyD") {
-    e.preventDefault();
-    if (getStickies().length === 0) return;
-    clearAllStickies();
-    currentYSaved = false;
-    refresh();
-    showToast("🗑 付箋を全て削除しました");
-  }
-}, { capture: true });
 
 // backgroundからのメッセージを受信
 chrome.runtime.onMessage.addListener((message) => {
@@ -80,6 +52,25 @@ chrome.runtime.onMessage.addListener((message) => {
     if (container) {
       container.style.display = container.style.display === "none" ? "" : "none";
     }
+  }
+  // chrome.commands経由のショートカット（SPA対応）
+  if (message.type === "ADD_STICKY") {
+    if (isMaxReached()) {
+      showToast("付箋は最大5枚までです");
+      return;
+    }
+    const added = addSticky();
+    if (added) {
+      refresh();
+      showToast(`📌 付箋を追加しました（${getStickies().length}/5）`);
+    }
+  }
+  if (message.type === "CLEAR_ALL_STICKIES") {
+    if (getStickies().length === 0) return;
+    clearAllStickies();
+    currentYSaved = false;
+    refresh();
+    showToast("🗑 付箋を全て削除しました");
   }
 });
 
