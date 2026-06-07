@@ -11,16 +11,20 @@ function refresh(): void {
 
 function init(): void {
   mountSakuraButton({
-    // 中央（黄色い種）: 花びらをクリックした直前の位置へ戻る
+    // 中央（黄色い種）: 最初に花びらを押した直前の位置へ戻る
     // 花びらを一度もクリックしていない場合は何もしない
+    // 戻ったらリセット（次の花びらクリックで新たな現在地を保存できるように）
     onCenterClick: () => {
       if (!currentYSaved) return;
       window.scrollTo({ top: getCurrentY(), behavior: "smooth" });
+      currentYSaved = false;
     },
-    // 花びら: クリック直前の位置を現在地として保存してからジャンプ
+    // 花びら: 最初のクリック時のみ現在地を保存（花びら→花びらでは上書きしない）
     onPetalClick: (scrollY) => {
-      updateCurrentY();
-      currentYSaved = true;
+      if (!currentYSaved) {
+        updateCurrentY();
+        currentYSaved = true;
+      }
       window.scrollTo({ top: scrollY, behavior: "smooth" });
     },
     // 花びら右クリック: 付箋を削除
