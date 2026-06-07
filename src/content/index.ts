@@ -27,19 +27,13 @@ function init(): void {
   refresh();
 }
 
-// Option+D（Mac）/ Alt+D（Win）で全付箋を削除
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyD") {
-    if (getStickies().length === 0) return;
-    clearAllStickies();
-    refresh();
-    showToast("🗑 付箋を全て削除しました");
-  }
-});
+// キーボードショートカット（capture: true でページの横取りより優先）
+window.addEventListener("keydown", (e) => {
+  if (!e.altKey) return;
 
-// Option+S（Mac）/ Alt+S（Win）で付箋を追加
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyS") {
+  // Option+S（Mac）/ Alt+S（Win）: 付箋を追加
+  if (e.code === "KeyS") {
+    e.preventDefault();
     if (isMaxReached()) {
       showToast("付箋は最大5枚までです");
       return;
@@ -50,7 +44,16 @@ document.addEventListener("keydown", (e) => {
       showToast(`📌 付箋を追加しました（${getStickies().length}/5）`);
     }
   }
-});
+
+  // Option+D（Mac）/ Alt+D（Win）: 全付箋を削除
+  if (e.code === "KeyD") {
+    e.preventDefault();
+    if (getStickies().length === 0) return;
+    clearAllStickies();
+    refresh();
+    showToast("🗑 付箋を全て削除しました");
+  }
+}, { capture: true });
 
 // backgroundからのメッセージを受信
 chrome.runtime.onMessage.addListener((message) => {
