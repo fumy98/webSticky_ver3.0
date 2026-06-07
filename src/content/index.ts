@@ -72,9 +72,13 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
-// bfcacheから復元されたとき（戻る/進む）も付箋をクリア
+// ナビゲーション種別に応じて付箋クリア
+// - リロード → 維持
+// - 遷移・戻る/進む・bfcacheからの復元 → クリア
 window.addEventListener("pageshow", (e) => {
-  if (e.persisted) {
+  const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+  const isReload = !e.persisted && nav?.type === "reload";
+  if (!isReload) {
     Object.keys(sessionStorage)
       .filter((key) => key.startsWith("websticky_"))
       .forEach((key) => sessionStorage.removeItem(key));
