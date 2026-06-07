@@ -6,8 +6,8 @@ chrome.action.onClicked.addListener((tab) => {
 });
 
 // キーボードショートカット（ブラウザレベルで処理するのでSPAでも動く）
-chrome.commands.onCommand.addListener(async (command) => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+// コールバック第2引数のtabが操作時にフォーカスされていたタブ
+chrome.commands.onCommand.addListener((command, tab) => {
   if (!tab?.id) return;
   if (command === "add-sticky") {
     chrome.tabs.sendMessage(tab.id, { type: "ADD_STICKY" }).catch(() => {});
