@@ -44,7 +44,6 @@ document.addEventListener("keydown", (e) => {
       showToast("付箋は最大5枚までです");
       return;
     }
-    updateCurrentY();
     const added = addSticky();
     if (added) {
       refresh();
@@ -56,7 +55,10 @@ document.addEventListener("keydown", (e) => {
 // backgroundからのメッセージを受信
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "CLEAR_STICKIES") {
-    sessionStorage.removeItem(`websticky_${location.href}`);
+    // 遷移元ページ含む全付箋データをクリア
+    Object.keys(sessionStorage)
+      .filter((key) => key.startsWith("websticky_"))
+      .forEach((key) => sessionStorage.removeItem(key));
     refresh();
   }
   if (message.type === "TOGGLE_VISIBILITY") {
