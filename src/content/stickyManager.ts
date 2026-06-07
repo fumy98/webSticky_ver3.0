@@ -50,3 +50,8 @@ export function getCurrentY(): number {
 export function isMaxReached(): boolean {
   return getStore(currentUrl()).stickies.length >= MAX_STICKIES;
 }
+
+// 全付箋を削除
+export function clearAllStickies(): void {
+  clearStore(currentUrl());
+}

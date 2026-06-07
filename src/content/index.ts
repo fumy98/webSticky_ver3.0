@@ -1,4 +1,4 @@
-import { addSticky, removeSticky, getStickies, updateCurrentY, getCurrentY, isMaxReached } from "./stickyManager";
+import { addSticky, removeSticky, clearAllStickies, getStickies, updateCurrentY, getCurrentY, isMaxReached } from "./stickyManager";
 import { mountSakuraButton, updateSakuraPetals } from "./ui/floatButton";
 import { showToast } from "./ui/toast";
 
@@ -26,6 +26,16 @@ function init(): void {
   });
   refresh();
 }
+
+// Option+D（Mac）/ Alt+D（Win）で全付箋を削除
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyD") {
+    if (getStickies().length === 0) return;
+    clearAllStickies();
+    refresh();
+    showToast("🗑 付箋を全て削除しました");
+  }
+});
 
 // Option+S（Mac）/ Alt+S（Win）で付箋を追加
 document.addEventListener("keydown", (e) => {
