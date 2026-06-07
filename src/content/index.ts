@@ -2,20 +2,25 @@ import { addSticky, removeSticky, clearAllStickies, getStickies, updateCurrentY,
 import { mountSakuraButton, updateSakuraPetals } from "./ui/floatButton";
 import { showToast } from "./ui/toast";
 
+// 花びらをクリックして現在地が保存されたかどうか
+let currentYSaved = false;
+
 function refresh(): void {
   updateSakuraPetals(getStickies());
 }
 
 function init(): void {
   mountSakuraButton({
-    // 中央（黄色い種）: 保存した現在地へ戻る（花びらがない場合は何もしない）
+    // 中央（黄色い種）: 花びらをクリックした直前の位置へ戻る
+    // 花びらを一度もクリックしていない場合は何もしない
     onCenterClick: () => {
-      if (getStickies().length === 0) return;
+      if (!currentYSaved) return;
       window.scrollTo({ top: getCurrentY(), behavior: "smooth" });
     },
-    // 花びら: 対応する付箋位置へジャンプ
+    // 花びら: クリック直前の位置を現在地として保存してからジャンプ
     onPetalClick: (scrollY) => {
       updateCurrentY();
+      currentYSaved = true;
       window.scrollTo({ top: scrollY, behavior: "smooth" });
     },
     // 花びら右クリック: 付箋を削除
@@ -51,6 +56,7 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     if (getStickies().length === 0) return;
     clearAllStickies();
+    currentYSaved = false;
     refresh();
     showToast("🗑 付箋を全て削除しました");
   }
