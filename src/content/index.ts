@@ -8,8 +8,9 @@ function refresh(): void {
 
 function init(): void {
   mountSakuraButton({
-    // 中央（黄色い種）: 保存した現在地へ戻る
+    // 中央（黄色い種）: 保存した現在地へ戻る（花びらがない場合は何もしない）
     onCenterClick: () => {
+      if (getStickies().length === 0) return;
       window.scrollTo({ top: getCurrentY(), behavior: "smooth" });
     },
     // 花びら: 対応する付箋位置へジャンプ
