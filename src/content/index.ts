@@ -43,11 +43,17 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// backgroundからのクリア指示を受信
+// backgroundからのメッセージを受信
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "CLEAR_STICKIES") {
     sessionStorage.removeItem(`websticky_${location.href}`);
     refresh();
+  }
+  if (message.type === "TOGGLE_VISIBILITY") {
+    const container = document.getElementById("websticky-sakura");
+    if (container) {
+      container.style.display = container.style.display === "none" ? "" : "none";
+    }
   }
 });
 

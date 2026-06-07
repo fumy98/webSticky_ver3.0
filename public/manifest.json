@@ -30,6 +30,14 @@
       "description": "付箋を追加"
     }
   },
+  "action": {
+    "default_title": "WebSticky — 表示/非表示",
+    "default_icon": {
+      "16": "icons/sakura.svg",
+      "48": "icons/sakura.svg",
+      "128": "icons/sakura.svg"
+    }
+  },
   "icons": {
     "16": "icons/sakura.svg",
     "48": "icons/sakura.svg",

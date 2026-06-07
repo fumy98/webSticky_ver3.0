@@ -1,3 +1,10 @@
+// ツールバーアイコンクリックで花UIの表示/非表示をトグル
+chrome.action.onClicked.addListener((tab) => {
+  if (tab.id) {
+    chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_VISIBILITY" }).catch(() => {});
+  }
+});
+
 // ナビゲーション検知：リロード以外で付箋をクリア
 chrome.webNavigation.onCommitted.addListener((details) => {
   // メインフレームのみ対象
