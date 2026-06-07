@@ -69,5 +69,15 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
+// bfcacheから復元されたとき（戻る/進む）も付箋をクリア
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) {
+    Object.keys(sessionStorage)
+      .filter((key) => key.startsWith("websticky_"))
+      .forEach((key) => sessionStorage.removeItem(key));
+    refresh();
+  }
+});
+
 init();
 console.info("[WebSticky] v3.0.0 loaded");
