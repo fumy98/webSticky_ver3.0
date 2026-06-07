@@ -1,5 +1,5 @@
 import type { Sticky } from "../types";
-import { getStore, saveStore } from "./storage";
+import { getStore, saveStore, clearStore } from "./storage";
 
 const MAX_STICKIES = 5;
 
