@@ -1,5 +1,6 @@
 import type { Sticky } from "../types";
 import { getStore, saveStore, clearStore } from "./storage";
+import { getScrollY } from "./scroll";
 
 const MAX_STICKIES = 5;
 
@@ -14,7 +15,7 @@ export function addSticky(): boolean {
 
   const sticky: Sticky = {
     id: crypto.randomUUID(),
-    scrollY: window.scrollY,
+    scrollY: getScrollY(),
     createdAt: Date.now(),
   };
   store.stickies.push(sticky);
@@ -37,7 +38,7 @@ export function getStickies(): Sticky[] {
 // 現在地を更新
 export function updateCurrentY(): void {
   const store = getStore(currentUrl());
-  store.currentY = window.scrollY;
+  store.currentY = getScrollY();
   saveStore(store);
 }
 

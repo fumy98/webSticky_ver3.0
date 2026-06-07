@@ -1,6 +1,7 @@
 import { addSticky, removeSticky, clearAllStickies, getStickies, updateCurrentY, getCurrentY, isMaxReached } from "./stickyManager";
 import { mountSakuraButton, updateSakuraPetals } from "./ui/floatButton";
 import { showToast } from "./ui/toast";
+import { scrollToY } from "./scroll";
 
 // 花びらをクリックして現在地が保存されたかどうか
 let currentYSaved = false;
@@ -13,7 +14,7 @@ function init(): void {
   mountSakuraButton({
     onCenterClick: () => {
       if (!currentYSaved) return;
-      window.scrollTo({ top: getCurrentY(), behavior: "smooth" });
+      scrollToY(getCurrentY());
       currentYSaved = false;
     },
     onPetalClick: (scrollY) => {
@@ -21,7 +22,7 @@ function init(): void {
         updateCurrentY();
         currentYSaved = true;
       }
-      window.scrollTo({ top: scrollY, behavior: "smooth" });
+      scrollToY(scrollY);
     },
     onPetalDelete: (id) => {
       removeSticky(id);
