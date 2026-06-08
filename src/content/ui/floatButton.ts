@@ -151,6 +151,16 @@ export function mountSakuraButton(callbacks: SakuraCallbacks): void {
     if (id) _callbacks?.onPetalDelete(id);
   });
 
+  // ウィンドウリサイズ時は右下にリセット
+  window.addEventListener("resize", () => {
+    if (!container) return;
+    const left = window.innerWidth - 110;
+    const top = window.innerHeight - 110;
+    container.style.left = `${left}px`;
+    container.style.top = `${top}px`;
+    savePos(top, left);
+  });
+
   setupDrag(container);
   document.body.appendChild(container);
 }
