@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — WebSticky</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: #f8f9fa;
+      color: #1a1a2e;
+      line-height: 1.8;
+      padding: 0 16px 80px;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 3px solid #f9b8d0;
+      padding: 40px 0 32px;
+      text-align: center;
+      margin: 0 -16px 40px;
+    }
+
+    .logo { font-size: 40px; margin-bottom: 8px; }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #c0527a;
+      letter-spacing: 0.02em;
+    }
+
+    header p {
+      margin-top: 8px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .lang-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 24px 0 0;
+    }
+
+    .lang-btn {
+      padding: 6px 20px;
+      border-radius: 20px;
+      border: 2px solid #f9b8d0;
+      background: #fff;
+      color: #c0527a;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lang-btn.active {
+      background: #f9b8d0;
+      color: #fff;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border-left: 4px solid #f9b8d0;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #c0527a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p, .card li { font-size: 15px; color: #333; }
+    .card ul { padding-left: 20px; }
+    .card li { margin-bottom: 6px; }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #fef0f5;
+      color: #c0527a;
+      border: 1px solid #f9b8d0;
+    }
+
+    .permissions-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .permissions-table th {
+      background: #fef0f5;
+      color: #c0527a;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .permissions-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+
+    .permissions-table tr:last-child td { border-bottom: none; }
+
+    .updated {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+      margin-top: 40px;
+    }
+
+    .contact-link {
+      color: #c0527a;
+      text-decoration: none;
+      border-bottom: 1px solid #f9b8d0;
+    }
+
+    .contact-link:hover { border-bottom-color: #c0527a; }
+
+    /* lang switch */
+    [data-lang="en"] { display: none; }
+    body.en [data-lang="ja"] { display: none; }
+    body.en [data-lang="en"] { display: block; }
+    body.en .card h2[data-lang="en"],
+    body.en p[data-lang="en"],
+    body.en td[data-lang="en"],
+    body.en li[data-lang="en"] { display: block; }
+    td[data-lang="en"], td[data-lang="ja"] { display: table-cell; }
+    body.en td[data-lang="ja"] { display: none; }
+    body.en th[data-lang="ja"] { display: none; }
+    body.en th[data-lang="en"] { display: table-cell; }
+    th[data-lang="en"] { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌸</div>
+  <h1>WebSticky</h1>
+  <p data-lang="ja">プライバシーポリシー / Privacy Policy</p>
+  <p data-lang="en" style="display:none">Privacy Policy</p>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('ja')">日本語</button>
+    <button class="lang-btn" onclick="setLang('en')">English</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 要約 -->
+  <div class="card">
+    <h2 data-lang="ja">🔒 一言まとめ</h2>
+    <h2 data-lang="en">🔒 Summary</h2>
+    <p data-lang="ja">WebSticky はあなたの個人情報を一切収集しません。すべてのデータはあなたのブラウザ内にのみ保存されます。</p>
+    <p data-lang="en">WebSticky does not collect any personal information. All data is stored locally in your browser only.</p>
+    <div class="badge-row">
+      <span class="badge">✅ 収集なし / No data collected</span>
+      <span class="badge">✅ 外部送信なし / No external transmission</span>
+      <span class="badge">✅ 第三者提供なし / No third-party sharing</span>
+    </div>
+  </div>
+
+  <!-- 収集するデータ -->
+  <div class="card">
+    <h2 data-lang="ja">📋 収集するデータ</h2>
+    <h2 data-lang="en">📋 Data Collection</h2>
+    <p data-lang="ja">WebSticky は以下のデータを一切収集しません：</p>
+    <p data-lang="en">WebSticky does not collect any of the following:</p>
+    <ul style="margin-top:12px">
+      <li data-lang="ja">個人を特定できる情報（氏名、メールアドレス等）</li>
+      <li data-lang="en">Personally identifiable information (name, email, etc.)</li>
+      <li data-lang="ja">閲覧したURLや履歴</li>
+      <li data-lang="en">Browsing history or visited URLs</li>
+      <li data-lang="ja">入力フォームの内容</li>
+      <li data-lang="en">Form input data</li>
+      <li data-lang="ja">クッキーやトラッキング情報</li>
+      <li data-lang="en">Cookies or tracking data</li>
+    </ul>
+  </div>
+
+  <!-- データの保存 -->
+  <div class="card">
+    <h2 data-lang="ja">💾 データの保存について</h2>
+    <h2 data-lang="en">💾 Data Storage</h2>
+    <p data-lang="ja">拡張機能の動作に必要な以下のデータのみを、<strong>ユーザーのブラウザ内</strong>に保存します。外部サーバーへの送信は一切行いません。</p>
+    <p data-lang="en">Only the following data required for the extension to function is stored <strong>locally in your browser</strong>. No data is sent to any external server.</p>
+    <table class="permissions-table" style="margin-top:16px">
+      <tr>
+        <th data-lang="ja">保存するデータ</th>
+        <th data-lang="en">Data Stored</th>
+        <th data-lang="ja">保存場所</th>
+        <th data-lang="en">Storage</th>
+        <th data-lang="ja">用途</th>
+        <th data-lang="en">Purpose</th>
+      </tr>
+      <tr>
+        <td data-lang="ja">付箋のスクロール位置</td>
+        <td data-lang="en">Sticky note scroll positions</td>
+        <td data-lang="ja">sessionStorage</td>
+        <td data-lang="en">sessionStorage</td>
+        <td data-lang="ja">ページ内の付箋位置を記憶するため</td>
+        <td data-lang="en">To remember sticky positions within the page</td>
+      </tr>
+      <tr>
+        <td data-lang="ja">桜UIの表示位置</td>
+        <td data-lang="en">Sakura UI position</td>
+        <td data-lang="ja">localStorage</td>
+        <td data-lang="en">localStorage</td>
+        <td data-lang="ja">ユーザーがドラッグした位置を維持するため</td>
+        <td data-lang="en">To persist user's dragged position</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 権限について -->
+  <div class="card">
+    <h2 data-lang="ja">🛡️ 要求する権限の理由</h2>
+    <h2 data-lang="en">🛡️ Why These Permissions</h2>
+    <table class="permissions-table">
+      <tr>
+        <th data-lang="ja">権限</th>
+        <th data-lang="en">Permission</th>
+        <th data-lang="ja">必要な理由</th>
+        <th data-lang="en">Reason</th>
+      </tr>
+      <tr>
+        <td data-lang="ja"><code>host_permissions: &lt;all_urls&gt;</code></td>
+        <td data-lang="en"><code>host_permissions: &lt;all_urls&gt;</code></td>
+        <td data-lang="ja">どのWebページでも付箋UIを表示するため。データ収集目的ではありません。</td>
+        <td data-lang="en">To display the sticky UI on any webpage. Not for data collection.</td>
+      </tr>
+      <tr>
+        <td data-lang="ja"><code>webNavigation</code></td>
+        <td data-lang="en"><code>webNavigation</code></td>
+        <td data-lang="ja">ページ遷移を検知し、適切なタイミングで付箋データをクリアするため。</td>
+        <td data-lang="en">To detect page navigation and clear sticky data at the appropriate time.</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 第三者 -->
+  <div class="card">
+    <h2 data-lang="ja">🤝 第三者への提供</h2>
+    <h2 data-lang="en">🤝 Third-Party Sharing</h2>
+    <p data-lang="ja">収集したデータはありません。したがって、第三者へのデータ提供も行いません。広告・アナリティクス・外部サービスとの連携は一切ありません。</p>
+    <p data-lang="en">We do not collect any data. Therefore, no data is shared with any third parties. There is no integration with advertising, analytics, or external services.</p>
+  </div>
+
+  <!-- 問い合わせ -->
+  <div class="card">
+    <h2 data-lang="ja">📬 お問い合わせ</h2>
+    <h2 data-lang="en">📬 Contact</h2>
+    <p data-lang="ja">プライバシーポリシーに関するご質問は、GitHubのIssueページよりお問い合わせください。</p>
+    <p data-lang="en">If you have any questions about this Privacy Policy, please contact us via GitHub Issues.</p>
+    <p style="margin-top:12px">
+      <a href="https://github.com/fumy98/webSticky_ver3.0/issues" class="contact-link" target="_blank">
+        GitHub Issues →
+      </a>
+    </p>
+  </div>
+
+  <p class="updated" data-lang="ja">最終更新：2026年6月8日</p>
+  <p class="updated" data-lang="en" style="display:none">Last updated: June 8, 2026</p>
+
+</div>
+
+<script>
+  function setLang(lang) {
+    document.body.classList.toggle('en', lang === 'en');
+    document.querySelectorAll('.lang-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', (i === 0 && lang === 'ja') || (i === 1 && lang === 'en'));
+    });
+  }
+</script>
+</body>
+</html>
