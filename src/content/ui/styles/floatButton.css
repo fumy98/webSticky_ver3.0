@@ -1,9 +1,13 @@
 #websticky-sakura {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
   z-index: 2147483647;
   user-select: none;
+  cursor: grab;
+}
+
+#websticky-sakura.ws-dragging,
+#websticky-sakura.ws-dragging * {
+  cursor: grabbing !important;
 }
 
 #websticky-sakura-svg {
