@@ -49,7 +49,7 @@ Stick bookmarks on any webpage like you would in a book. Never lose important Ch
 • 中央の黄色い種をクリック: 花びらを押す直前の場所へ戻る
 • 花びらを右クリック: その付箋を削除
 • Option+D（Mac）/ Alt+D（Win）: 全付箋を削除
-• ツールバーアイコン: UIの表示/非表示
+• 拡張機能アイコンをクリック: UIの表示/非表示（ツールバーへのピン留め推奨）
 
 【特徴】
 • 付箋は1ページ最大5枚。ページが変わると自動でリセット
@@ -77,7 +77,7 @@ Just like slipping bookmarks into a book, WebSticky lets you instantly mark "I'l
 • Click the yellow center: Return to where you were before clicking a petal
 • Right-click a petal: Delete that sticky
 • Option+D (Mac) / Alt+D (Win): Clear all stickies
-• Click toolbar icon: Show/hide the UI
+• Click the extension icon: Show/hide the UI (pin to toolbar recommended)
 
 【Features】
 • Up to 5 stickies per page — auto-cleared when you navigate away
