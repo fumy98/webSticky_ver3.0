@@ -21,7 +21,14 @@ let suppressNextClick = false;
 function loadPos(): { top: number; left: number } {
   try {
     const saved = localStorage.getItem(POS_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const pos = JSON.parse(saved);
+      // ウィンドウサイズが変わっても画面外に出ないようクランプ
+      return {
+        left: Math.max(0, Math.min(pos.left, window.innerWidth - 110)),
+        top: Math.max(0, Math.min(pos.top, window.innerHeight - 110)),
+      };
+    }
   } catch {}
   return {
     left: window.innerWidth - 110,
