@@ -52,6 +52,7 @@ Bookmark up to 5 scroll positions on any webpage with a beautiful sakura UI. Jum
 • リロードしても付箋は維持、別ページへ遷移すると自動クリア
 • ChatGPT・Notion などのSPAでも動作
 • 桜UIはドラッグで好きな位置に移動可能
+• 桜UIはドラッグで好きな位置に移動可能（位置はブラウザに保存）
 • 個人情報の収集なし、外部通信なし
 
 【こんな方におすすめ】
@@ -79,7 +80,7 @@ Lost important answers in a long ChatGPT conversation? Can't find that key secti
 • Petals bloom one by one as you add stickies — beautiful and intuitive
 • Stickies persist on reload, auto-cleared on page navigation
 • Works on SPAs like ChatGPT and Notion
-• Draggable sakura UI — place it anywhere on screen
+• Draggable sakura UI — drag to place anywhere on screen, position saved automatically
 • Zero data collection, zero external requests
 
 【Perfect for】
