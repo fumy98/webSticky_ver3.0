@@ -48,7 +48,7 @@ window.addEventListener("keydown", (e) => {
     const added = addSticky();
     if (added) {
       refresh();
-      showToast(`📌 付箋を追加しました（${getStickies().length}/5）`);
+      showToast(`付箋を追加しました（${getStickies().length}/5）`);
     }
   }
 
@@ -59,7 +59,7 @@ window.addEventListener("keydown", (e) => {
     clearAllStickies();
     currentYSaved = false;
     refresh();
-    showToast("🗑 付箋を全て削除しました");
+    showToast("付箋を全て削除しました");
   }
 }, { capture: true });
 
