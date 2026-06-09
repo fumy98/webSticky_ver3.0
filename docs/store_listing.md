@@ -93,7 +93,7 @@ Just like slipping bookmarks into a book, WebSticky lets you instantly mark "I'l
 ## プライバシーポリシーURL
 
 ```
-（GitHub Pages 公開後に記載）
+https://fumy98.github.io/webSticky_ver3.0/privacy_policy.html
 ```
 
 ---
